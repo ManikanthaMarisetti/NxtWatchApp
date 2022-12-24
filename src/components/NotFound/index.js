@@ -1,55 +1,47 @@
-import 'react-loader-spinner/dist/loader/ThreeDots'
-
-import ThemeContext from '../context/ThemeContext'
-
 import Header from '../Header'
-import Sidebar from '../Sidebar'
-
+import NavigationBar from '../NavigationBar'
+import ThemeAndVideoContext from '../../context/ThemeAndVideoContext'
 import {
-  NotFoundPageContainer,
-  SidebarVideosContainer,
   NotFoundContainer,
-  FailureContainer,
-  FailedImage,
-  FailedHeading,
-  FailedDescription,
+  NotFoundVideosView,
+  NotFoundVideosImage,
+  NotFoundVideosHeading,
+  NotFoundVideosNote,
 } from './styledComponents'
 
 const NotFound = () => (
-  <ThemeContext.Consumer>
+  <ThemeAndVideoContext.Consumer>
     {value => {
-      const {darkTheme} = value
+      const {isDarkTheme} = value
+      // console.log(savedVideos)
 
-      const renderNotFound = () => (
-        <FailureContainer dark={darkTheme}>
-          <FailedImage
-            src={
-              darkTheme
-                ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-not-found-dark-theme-img.png'
-                : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-not-found-light-theme-img.png'
-            }
-            alt="not found"
-          />
-          <FailedHeading dark={darkTheme}>Page Not Found</FailedHeading>
-          <FailedDescription>
-            we are sorry, the page you requested could not be found.
-          </FailedDescription>
-        </FailureContainer>
-      )
+      const bgColor = isDarkTheme ? '#181818' : '#f9f9f9'
+      const headingColor = isDarkTheme ? '#f1f5f9' : '#1e293b'
+      const noteColor = isDarkTheme ? '#e2e8f0' : '#475569'
+
+      const notFindImageUrl = isDarkTheme
+        ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-not-found-light-theme-img.png'
+        : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-not-found-dark-theme-img.png'
 
       return (
-        <NotFoundPageContainer>
+        <>
           <Header />
-          <SidebarVideosContainer>
-            <Sidebar />
-            <NotFoundContainer dark={darkTheme} data-testid="home">
-              {renderNotFound()}
-            </NotFoundContainer>
-          </SidebarVideosContainer>
-        </NotFoundPageContainer>
+          <NavigationBar />
+          <NotFoundContainer bgColor={bgColor}>
+            <NotFoundVideosView>
+              <NotFoundVideosImage src={notFindImageUrl} alt="not found" />
+              <NotFoundVideosHeading headingColor={headingColor}>
+                Page Not Found
+              </NotFoundVideosHeading>
+              <NotFoundVideosNote noteColor={noteColor}>
+                We are sorry, the page you requested could not be found.
+              </NotFoundVideosNote>
+            </NotFoundVideosView>
+          </NotFoundContainer>
+        </>
       )
     }}
-  </ThemeContext.Consumer>
+  </ThemeAndVideoContext.Consumer>
 )
 
 export default NotFound

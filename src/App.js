@@ -1,124 +1,85 @@
 import {Component} from 'react'
-import {Switch, Route, Redirect} from 'react-router-dom'
+import {Route, Switch, Redirect} from 'react-router-dom'
 
-import Login from './components/Login'
-import Home from './components/Home'
-import Trending from './components/Trending'
-import Gaming from './components/Gaming'
-import SavedVideos from './components/SavedVideos'
-import VideoItemDetails from './components/VideoItemDetails'
-import NotFound from './components/Notfound'
 import ProtectedRoute from './components/ProtectedRoute'
+import LoginForm from './components/LoginForm'
+import Home from './components/Home'
+import VideoDetailView from './components/VideoDetailView'
+import TrendingVideos from './components/TrendingVideos'
+import GamingVideos from './components/GamingVideos'
+import SavedVideos from './components/SavedVideos'
+import NotFound from './components/NotFound'
 
-import ThemeContext from './components/context/ThemeContext'
+import ThemeAndVideoContext from './context/ThemeAndVideoContext'
+
 import './App.css'
 
+// Replace your code here
 class App extends Component {
   state = {
-    darkTheme: false,
     savedVideos: [],
-    likedVideosIds: [],
-    dislikedVideosIds: [],
+    isDarkTheme: false,
+    activeTab: 'Home',
   }
 
-  onClickToggleTheme = () => {
-    this.setState(prevState => ({darkTheme: !prevState.darkTheme}))
+  changeTab = tab => {
+    this.setState({activeTab: tab})
   }
 
-  onClickSaveButton = videoDetails => {
-    const {id} = videoDetails
+  toggleTheme = () => {
+    this.setState(prevState => ({
+      isDarkTheme: !prevState.isDarkTheme,
+    }))
+  }
+
+  addVideo = video => {
     const {savedVideos} = this.state
-    const savedVideoExists =
-      savedVideos.find(savedVideo => savedVideo.id === id) !== undefined
-    if (savedVideoExists) {
-      this.setState(previousState => ({
-        savedVideos: previousState.savedVideos.filter(
-          savedVideo => savedVideo.id !== id,
-        ),
-      }))
+    const index = savedVideos.findIndex(eachVideo => eachVideo.id === video.id)
+    if (index === -1) {
+      this.setState({savedVideos: [...savedVideos, video]})
     } else {
-      this.setState(previousState => ({
-        savedVideos: [...previousState.savedVideos, videoDetails],
-      }))
+      savedVideos.splice(index, 1)
+      this.setState({savedVideos})
     }
   }
 
-  onClickLikeButton = id => {
-    const {likedVideosIds} = this.state
-    const likedVideoIdExists = likedVideosIds.includes(id)
-    if (likedVideoIdExists) {
-      this.setState(previousState => ({
-        likedVideosIds: previousState.likedVideosIds.filter(
-          likedVideoId => likedVideoId !== id,
-        ),
-      }))
-    } else {
-      this.setState(previousState => ({
-        likedVideosIds: [...previousState.likedVideosIds, id],
-        dislikedVideosIds: previousState.dislikedVideosIds.filter(
-          likedVideoId => likedVideoId !== id,
-        ),
-      }))
-    }
-  }
-
-  onClickDislikeButton = id => {
-    const {dislikedVideosIds} = this.state
-    const dislikedVideoIdExists = dislikedVideosIds.includes(id)
-    if (dislikedVideoIdExists) {
-      this.setState(previousState => ({
-        dislikedVideosIds: previousState.dislikedVideosIds.filter(
-          likedVideoId => likedVideoId !== id,
-        ),
-      }))
-    } else {
-      this.setState(previousState => ({
-        dislikedVideosIds: [...previousState.dislikedVideosIds, id],
-        likedVideosIds: previousState.likedVideosIds.filter(
-          likedVideoId => likedVideoId !== id,
-        ),
-      }))
-    }
+  removeVideo = id => {
+    const {savedVideos} = this.state
+    const updatedSavedVideos = savedVideos.filter(
+      eachVideo => eachVideo.id !== id,
+    )
+    this.setState({savedVideos: updatedSavedVideos})
   }
 
   render() {
-    const {
-      darkTheme,
-      savedVideos,
-      likedVideosIds,
-      dislikedVideosIds,
-    } = this.state
+    const {savedVideos, isDarkTheme, activeTab} = this.state
+    // console.log(savedVideos)
     return (
-      <ThemeContext.Provider
+      <ThemeAndVideoContext.Provider
         value={{
-          darkTheme,
-          onToggleThemeButton: this.onClickToggleTheme,
-
           savedVideos,
-          onClickSaveButton: this.onClickSaveButton,
-
-          likedVideosIds,
-          onClickLikeButton: this.onClickLikeButton,
-
-          dislikedVideosIds,
-          onClickDislikeButton: this.onClickDislikeButton,
+          isDarkTheme,
+          activeTab,
+          toggleTheme: this.toggleTheme,
+          addVideo: this.addVideo,
+          changeTab: this.changeTab,
         }}
       >
         <Switch>
-          <Route exact path="/login" component={Login} />
+          <Route exact path="/login" component={LoginForm} />
           <ProtectedRoute exact path="/" component={Home} />
-          <ProtectedRoute exact path="/trending" component={Trending} />
           <ProtectedRoute
             exact
             path="/videos/:id"
-            component={VideoItemDetails}
+            component={VideoDetailView}
           />
-          <ProtectedRoute exact path="/gaming" component={Gaming} />
+          <ProtectedRoute exact path="/trending" component={TrendingVideos} />
+          <ProtectedRoute exact path="/gaming" component={GamingVideos} />
           <ProtectedRoute exact path="/saved-videos" component={SavedVideos} />
-          <ProtectedRoute exact path="/not-found" component={NotFound} />
-          <Redirect to="/not-found" />
+          <Route path="/not-found" component={NotFound} />
+          <Redirect to="not-found" />
         </Switch>
-      </ThemeContext.Provider>
+      </ThemeAndVideoContext.Provider>
     )
   }
 }

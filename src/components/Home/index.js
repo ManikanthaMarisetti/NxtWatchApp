@@ -1,229 +1,183 @@
 import {Component} from 'react'
 import Cookies from 'js-cookie'
-
 import Loader from 'react-loader-spinner'
-import 'react-loader-spinner/dist/loader/ThreeDots'
 
-import {AiOutlineSearch} from 'react-icons/ai'
+import {AiOutlineClose, AiOutlineSearch} from 'react-icons/ai'
 
 import Header from '../Header'
-import Sidebar from '../Sidebar'
-import Banner from '../Banner'
-import HomeVideoItem from '../HomeVideoItem'
-import ThemeContext from '../context/ThemeContext'
+import NavigationBar from '../NavigationBar'
+import ThemeAndVideoContext from '../../context/ThemeAndVideoContext'
+import HomeVideos from '../HomeVideos'
+import FailureView from '../FailureView'
+
 import {
-  HomePageContainer,
-  SidebarAndVideosContainer,
-  VideosPageContainer,
-  VideosAndSearchContainer,
-  SearchBarContainer,
-  SearchInputContainer,
-  SearchButton,
-  VideosContainer,
-  FailureNotFoundContainer,
-  FailedNotFoundImage,
-  FailedNotFoundHeading,
-  FailedNotFoundDescription,
-  RetryButton,
-  VideosListContainer,
+  HomeContainer,
+  BannerContainer,
+  BannerImage,
+  BannerText,
+  BannerButton,
+  BannerLeftPart,
+  BannerRightPart,
+  BannerCloseButton,
+  SearchContainer,
+  SearchInput,
+  SearchIconContainer,
+  LoaderContainer,
 } from './styledComponents'
 
 const apiStatusConstants = {
   initial: 'INITIAL',
   success: 'SUCCESS',
   failure: 'FAILURE',
-  loading: 'LOADING',
-  noVideos: 'NOVIDEOS',
+  inProgress: 'IN_PROGRESS',
 }
 
 class Home extends Component {
   state = {
-    showBanner: true,
+    homeVideos: [],
     searchInput: '',
     apiStatus: apiStatusConstants.initial,
-    videosList: [],
+    bannerDisplay: 'flex',
   }
 
   componentDidMount() {
-    this.loadData()
+    this.getVideos()
   }
 
-  loadData = async () => {
-    this.setState({apiStatus: apiStatusConstants.loading})
+  getVideos = async () => {
     const {searchInput} = this.state
+    this.setState({apiStatus: apiStatusConstants.inProgress})
+    const jwtToken = Cookies.get('jwt_token')
     const url = `https://apis.ccbp.in/videos/all?search=${searchInput}`
     const options = {
-      method: 'GET',
       headers: {
-        Authorization: `Bearer ${Cookies.get('jwt_token')}`,
+        Authorization: `Bearer ${jwtToken}`,
       },
+      method: 'GET',
     }
-
     const response = await fetch(url, options)
-    const data = await response.json()
     if (response.ok) {
-      if (data.total === 0) {
-        this.setState({apiStatus: apiStatusConstants.noVideos})
-      } else {
-        const updatedData = data.videos.map(eachVideo => ({
-          id: eachVideo.id,
-          title: eachVideo.title,
-          thumbnailUrl: eachVideo.thumbnail_url,
-          publishedAt: eachVideo.published_at,
-          viewCount: eachVideo.view_count,
-          channel: {
-            name: eachVideo.channel.name,
-            profileImageUrl: eachVideo.channel.profile_image_url,
-          },
-        }))
-        this.setState({
-          apiStatus: apiStatusConstants.success,
-          videosList: updatedData,
-        })
-      }
+      const data = await response.json()
+      // console.log(data)
+      const updatedData = data.videos.map(eachVideo => ({
+        id: eachVideo.id,
+        title: eachVideo.title,
+        thumbnailUrl: eachVideo.thumbnail_url,
+        viewCount: eachVideo.view_count,
+        publishedAt: eachVideo.published_at,
+        name: eachVideo.channel.name,
+        profileImageUrl: eachVideo.channel.profile_image_url,
+      }))
+      this.setState({
+        homeVideos: updatedData,
+        apiStatus: apiStatusConstants.success,
+      })
+    } else {
+      this.setState({apiStatus: apiStatusConstants.failure})
     }
   }
 
-  onClickSearchButton = () => {
-    this.loadData()
+  onCloseBanner = () => {
+    this.setState({bannerDisplay: 'none'})
   }
 
-  onChangeSearch = event => {
+  onChangeInput = event => {
     this.setState({searchInput: event.target.value})
   }
 
-  onClickCloseButton = () => {
-    this.setState(prevState => ({showBanner: !prevState.showBanner}))
+  getSearchResults = () => {
+    this.getVideos()
   }
 
-  onClickRetryButton = () => {
-    this.loadData()
+  onRetry = () => {
+    this.setState({searchInput: ''}, this.getVideos)
   }
 
-  renderLoadingView = dark => {
-    const loaderColor = dark ? '#ffffff' : '#3b82f6'
-    return (
-      <VideosContainer data-testid="loader">
-        <Loader type="ThreeDots" color={loaderColor} height="50" width="50" />
-      </VideosContainer>
-    )
-  }
-
-  renderNoVideosView = dark => (
-    <FailureNotFoundContainer dark={dark}>
-      <FailedNotFoundImage
-        src="https://assets.ccbp.in/frontend/react-js/nxt-watch-no-search-results-img.png"
-        alt="no videos"
-      />
-      <FailedNotFoundHeading dark={dark}>
-        No Search results found
-      </FailedNotFoundHeading>
-      <FailedNotFoundDescription>
-        Try different key words or remove search filter
-      </FailedNotFoundDescription>
-      <RetryButton type="button" onClick={this.onClickRetryButton}>
-        Retry
-      </RetryButton>
-    </FailureNotFoundContainer>
+  renderLoadingView = () => (
+    <LoaderContainer data-testid="loader">
+      <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
+    </LoaderContainer>
   )
 
-  renderFailureView = dark => (
-    <FailureNotFoundContainer dark={dark}>
-      <FailedNotFoundImage
-        src={
-          dark
-            ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-dark-theme-img.png'
-            : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-light-theme-img.png'
-        }
-        alt="failure view"
-      />
-      <FailedNotFoundHeading dark={dark}>
-        Oops! Something Went Wrong
-      </FailedNotFoundHeading>
-      <FailedNotFoundDescription>
-        We are having some trouble to complete your request. Please try again
-      </FailedNotFoundDescription>
-      <RetryButton type="button" onClick={this.onClickRetryButton}>
-        Retry
-      </RetryButton>
-    </FailureNotFoundContainer>
-  )
-
-  renderVideosList = () => {
-    const {videosList} = this.state
-    return (
-      <VideosListContainer>
-        {videosList.map(video => (
-          <HomeVideoItem videoDetails={video} key={video.id} />
-        ))}
-      </VideosListContainer>
-    )
+  renderVideosView = () => {
+    const {homeVideos} = this.state
+    return <HomeVideos homeVideos={homeVideos} onRetry={this.onRetry} />
   }
 
-  renderVideos = dark => {
+  renderFailureView = () => <FailureView onRetry={this.onRetry} />
+
+  renderHomeVideos = () => {
     const {apiStatus} = this.state
+
     switch (apiStatus) {
       case apiStatusConstants.success:
-        return this.renderVideosList()
+        return this.renderVideosView()
       case apiStatusConstants.failure:
-        return this.renderFailureView(dark)
-      case apiStatusConstants.loading:
-        return this.renderLoadingView(dark)
-      case apiStatusConstants.noVideos:
-        return this.renderNoVideosView(dark)
+        return this.renderFailureView()
+      case apiStatusConstants.inProgress:
+        return this.renderLoadingView()
       default:
         return null
     }
   }
 
-  renderSearchBar = dark => {
-    const {searchInput} = this.state
-    return (
-      <SearchBarContainer>
-        <SearchInputContainer
-          type="search"
-          value={searchInput}
-          onChange={this.onChangeSearch}
-          placeholder="Search"
-          dark={dark}
-        />
-        <SearchButton
-          type="button"
-          onClick={this.onClickSearchButton}
-          dark={dark}
-          data-testid="searchButton"
-        >
-          <AiOutlineSearch color={dark ? '#565554' : '#777777'} />
-        </SearchButton>
-      </SearchBarContainer>
-    )
-  }
-
   render() {
-    const {showBanner} = this.state
+    const {searchInput, bannerDisplay} = this.state
     return (
-      <ThemeContext.Consumer>
+      <ThemeAndVideoContext.Consumer>
         {value => {
-          const {darkTheme} = value
+          const {isDarkTheme} = value
+
+          const bgColor = isDarkTheme ? '#181818' : '#f9f9f9'
+          const textColor = isDarkTheme ? '#f9f9f9' : '#231f20'
+          const display = bannerDisplay === 'flex' ? 'flex' : 'none'
+
           return (
-            <HomePageContainer dark={darkTheme} data-testid="home">
+            <>
               <Header />
-              <SidebarAndVideosContainer>
-                <Sidebar />
-                <VideosPageContainer dark={darkTheme}>
-                  {showBanner && (
-                    <Banner onClickCloseButton={this.onClickCloseButton} />
-                  )}
-                  <VideosAndSearchContainer>
-                    {this.renderSearchBar(darkTheme)}
-                    {this.renderVideos(darkTheme)}
-                  </VideosAndSearchContainer>
-                </VideosPageContainer>
-              </SidebarAndVideosContainer>
-            </HomePageContainer>
+              <NavigationBar />
+              <HomeContainer data-testid="home" bgColor={bgColor}>
+                <BannerContainer data-testid="banner" display={display}>
+                  <BannerLeftPart>
+                    <BannerImage
+                      src="https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png"
+                      alt="nxt watch logo"
+                    />
+                    <BannerText>
+                      Buy Nxt Watch Premium prepaid plans with <br /> UPI
+                    </BannerText>
+                    <BannerButton type="button">GET IT NOW</BannerButton>
+                  </BannerLeftPart>
+                  <BannerRightPart>
+                    <BannerCloseButton
+                      data-testid="close"
+                      onClick={this.onCloseBanner}
+                    >
+                      <AiOutlineClose size={25} />
+                    </BannerCloseButton>
+                  </BannerRightPart>
+                </BannerContainer>
+                <SearchContainer>
+                  <SearchInput
+                    type="search"
+                    placeholder="Search"
+                    value={searchInput}
+                    onChange={this.onChangeInput}
+                    color={textColor}
+                  />
+                  <SearchIconContainer
+                    data-testid="searchButton"
+                    onClick={this.getSearchResults}
+                  >
+                    <AiOutlineSearch size={20} />
+                  </SearchIconContainer>
+                </SearchContainer>
+                {this.renderHomeVideos()}
+              </HomeContainer>
+            </>
           )
         }}
-      </ThemeContext.Consumer>
+      </ThemeAndVideoContext.Consumer>
     )
   }
 }

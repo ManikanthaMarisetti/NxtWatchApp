@@ -1,89 +1,133 @@
-import {Link} from 'react-router-dom'
+import {withRouter} from 'react-router-dom'
+import Cookies from 'js-cookie'
 import Popup from 'reactjs-popup'
 
-import {FiSun} from 'react-icons/fi'
-import {FaMoon} from 'react-icons/fa'
-import {GiHamburgerMenu} from 'react-icons/gi'
-import {MdClose} from 'react-icons/md'
+import {BsMoon, BsBrightnessHigh} from 'react-icons/bs'
+import {FiLogOut} from 'react-icons/fi'
 
-import ThemeContext from '../context/ThemeContext'
-import LogoutButton from '../LogoutButton'
-import LinksMenu from '../LinksMenu'
+import ThemeAndVideoContext from '../../context/ThemeAndVideoContext'
 
 import {
-  HeaderContainer,
-  LogoContainer,
-  Logo,
-  HeaderIconsContainer,
+  LogoLink,
+  NavbarHeader,
+  HeaderLogo,
+  ActionsContainer,
   ThemeButton,
-  ProfileButton,
+  LogoutIconButton,
+  LogoutButton,
   ProfileImage,
-  LinksButton,
-  LinksPopupContainer,
+  ModalContainer,
   CloseButton,
-  LinksContainer,
+  ConfirmButton,
+  ModalDesc,
+  ButtonsContainer,
 } from './styledComponents'
 
-const Header = () => (
-  <ThemeContext.Consumer>
+const Header = props => (
+  <ThemeAndVideoContext.Consumer>
     {value => {
-      const {darkTheme, onToggleThemeButton} = value
-      const iconColor = darkTheme ? '#fff' : '#000'
-      const logoUrl = darkTheme
-        ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-dark-theme-img.png'
-        : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png'
+      const {isDarkTheme, toggleTheme} = value
+      const color = isDarkTheme ? '#ffffff' : '#00306e'
+      const bgColor = isDarkTheme ? '#231f20' : '#f1f5f9'
 
-      const renderPopupMenu = () => (
-        <Popup
-          modal
-          trigger={
-            <LinksButton>
-              <GiHamburgerMenu size={30} color={iconColor} />
-            </LinksButton>
-          }
-          className="popup-content"
-        >
-          {close => (
-            <LinksPopupContainer dark={darkTheme}>
-              <CloseButton onClick={() => close()}>
-                <MdClose size={28} color={iconColor} />
-              </CloseButton>
-              <LinksContainer>
-                <LinksMenu />
-              </LinksContainer>
-            </LinksPopupContainer>
-          )}
-        </Popup>
-      )
+      const onChangeTheme = () => {
+        toggleTheme()
+      }
+
+      const onClickLogout = () => {
+        const {history} = props
+        Cookies.remove('jwt_token')
+        history.replace('/login')
+      }
 
       return (
-        <HeaderContainer dark={darkTheme}>
-          <LogoContainer>
-            <Link to="/">
-              <Logo src={logoUrl} alt="website logo" />
-            </Link>
-          </LogoContainer>
-          <HeaderIconsContainer>
-            <ThemeButton onClick={onToggleThemeButton} data-testid="theme">
-              {darkTheme ? (
-                <FiSun size={26} color={iconColor} />
+        <NavbarHeader bgColor={bgColor}>
+          <LogoLink to="/">
+            <HeaderLogo
+              src={
+                isDarkTheme
+                  ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-dark-theme-img.png'
+                  : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png'
+              }
+              alt="website logo"
+            />
+          </LogoLink>
+          <ActionsContainer>
+            <ThemeButton
+              type="button"
+              data-testid="theme"
+              onClick={onChangeTheme}
+            >
+              {isDarkTheme ? (
+                <BsBrightnessHigh color="#ffffff" size={25} />
               ) : (
-                <FaMoon size={26} color={iconColor} />
+                <BsMoon size={25} />
               )}
             </ThemeButton>
-            {renderPopupMenu()}
-            <ProfileButton>
-              <ProfileImage
-                src="https://assets.ccbp.in/frontend/react-js/nxt-watch-profile-img.png"
-                alt="profile"
-              />
-            </ProfileButton>
-            <LogoutButton />
-          </HeaderIconsContainer>
-        </HeaderContainer>
+            <ProfileImage
+              src="https://assets.ccbp.in/frontend/react-js/nxt-watch-profile-img.png"
+              alt="profile"
+            />
+            <Popup
+              modal
+              trigger={
+                <LogoutButton type="button" bgColor={bgColor} color={color}>
+                  Logout
+                </LogoutButton>
+              }
+            >
+              {close => (
+                <ModalContainer>
+                  <ModalDesc>Are you sure, you want to logout?</ModalDesc>
+                  <ButtonsContainer>
+                    <CloseButton
+                      type="button"
+                      data-testid="closeButton"
+                      onClick={() => close()}
+                    >
+                      Cancel
+                    </CloseButton>
+
+                    <ConfirmButton type="button" onClick={onClickLogout}>
+                      Confirm
+                    </ConfirmButton>
+                  </ButtonsContainer>
+                </ModalContainer>
+              )}
+            </Popup>
+            <Popup
+              modal
+              trigger={
+                <LogoutIconButton type="button">
+                  <FiLogOut size={25} color={color} />
+                </LogoutIconButton>
+              }
+              className="popup-content"
+            >
+              {close => (
+                <ModalContainer>
+                  <ModalDesc>Are you sure, you want to logout?</ModalDesc>
+                  <ButtonsContainer>
+                    <CloseButton
+                      type="button"
+                      data-testid="closeButton"
+                      onClick={() => close()}
+                    >
+                      Cancel
+                    </CloseButton>
+
+                    <ConfirmButton type="button" onClick={onClickLogout}>
+                      Confirm
+                    </ConfirmButton>
+                  </ButtonsContainer>
+                </ModalContainer>
+              )}
+            </Popup>
+          </ActionsContainer>
+        </NavbarHeader>
       )
     }}
-  </ThemeContext.Consumer>
+  </ThemeAndVideoContext.Consumer>
 )
 
-export default Header
+export default withRouter(Header)

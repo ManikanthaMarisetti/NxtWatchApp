@@ -1,128 +1,95 @@
 import styled from 'styled-components'
 
-export const HomePageContainer = styled.div`
+export const HomeContainer = styled.div`
+  background-color: ${props => props.bgColor};
+  min-height: 100vh;
+  margin-top: 60px;
+  margin-bottom: 60px;
+  overflow-y: auto;
+
+  @media screen and (min-width: 768px) {
+    margin-left: 250px;
+    margin-bottom: 0px;
+  }
+`
+export const BannerContainer = styled.div`
+  background-image: url('https://assets.ccbp.in/frontend/react-js/nxt-watch-banner-bg.png');
   width: 100%;
-  height: 100vh;
+  background-size: cover;
+  height: 200px;
+  display: ${props => props.display};
+  justify-content: space-between;
+  padding: 20px;
+`
+export const BannerLeftPart = styled.div`
+  width: 50%;
+`
+export const BannerRightPart = styled.div`
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background-color: ${props => (props.dark ? '#181818' : '#f9f9f9')};
+  justify-content: flex-end;
 `
 
-export const SidebarAndVideosContainer = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
+export const BannerImage = styled.img`
+  width: 80px;
+  height: 30px;
 `
-export const VideosPageContainer = styled.div`
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: ${props => (props.dark ? '#181818' : '#f9f9f9')};
-  display: flex;
-  flex-direction: column;
+export const BannerButton = styled.button`
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border: 1px solid #000000;
+  color: #000000;
+  background: none;
 `
-export const VideosAndSearchContainer = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  @media (min-width: 768px) {
-    padding: 30px;
-  }
-`
-export const SearchBarContainer = styled.div`
-  width: 100%;
-  height: 40px;
-  display: flex;
-  border: 1.5px solid #d1d1d1;
-  @media (min-width: 768px) {
-    max-width: 450px;
-  }
-  border-radius: 6px;
-  background: transparent;
-`
-export const SearchInputContainer = styled.input`
-  width: 100%;
-  height: 100%;
-  padding: 10px 20px;
-  border: none;
-  outline: none;
-  font-size: 16px;
+export const BannerText = styled.p`
   font-family: 'Roboto';
-  border-radius: 6px 0 0 6px;
-  background-color: transparent;
-  color: ${props => (props.dark ? '#f9f9f9' : '#b2b8b4')};
+  font-size: 15px;
+  color: #000000;
+
+  @media screen and (min-width: 576px) {
+    font-size: 20px;
+  }
 `
-export const SearchButton = styled.button`
-  padding: 10px 30px;
+export const BannerCloseButton = styled.button`
   border: none;
-  outline: none;
-  cursor: pointer;
-  border-left: 2px solid #d0d0d0;
-  background-color: ${props => (props.dark ? '#313031' : '#f4f4f4')};
+  background: none;
+  height: 25px;
 `
-export const VideosContainer = styled.div`
-  width: 100%;
-  height: 100%;
+
+export const SearchContainer = styled.div`
   display: flex;
-  flex-wrap: wrap;
+  border: 1px solid #909090;
+  border-radius: 3px;
+  margin: 20px;
+  width: 60%;
+  height: 40px;
+
+  @media screen and (min-width: 576px) {
+    width: 40%;
+  }
+`
+export const SearchIconContainer = styled.button`
+  display: flex;
   justify-content: center;
   align-items: center;
-  background: transparent;
-`
-export const FailureNotFoundContainer = styled(VideosContainer)`
-  background-color: ${props => (props.dark ? '#181818' : '#F9F9F9')};
-  flex-direction: column;
-  justify-content: space-between
-  padding: 30px 20px;
-`
-export const FailedNotFoundImage = styled.img`
-  width: 100%;
-  max-width: 300px;
-`
-export const FailedNotFoundHeading = styled.h1`
-  width: 100%;
-  text-align: center;
-  font-size: 26px;
-  font-family: 'Roboto';
-  color: ${props => (props.dark ? '#F6F8FC' : '#1B2C41')};
-  margin: 16px 0;
-  @media (min-width: 768px) {
-    font-size: 32px;
-  }
-`
-export const FailedNotFoundDescription = styled.p`
-  width: 100%;
-  text-align: center;
-  font-family: 'Roboto';
-  color: #4d6480;
-  margin: 10px 0;
-  line-height: 1.5;
-`
-
-export const VideosListContainer = styled.ul`
-  width: 100%;
-  height: 100%;
-  list-style-type: none;
-  display: flex;
-  flex-direction: column;
-  margin: 16px 0;
-  padding-left: 0;
-  @media (min-width: 576px) {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-`
-
-export const RetryButton = styled.button`
-  width: 100px;
-  height: 40px;
-  color: #ffffff;
-  background-color: #4f46e5;
+  background-color: #909090;
+  width: 70px;
   border: none;
+`
+
+export const SearchInput = styled.input`
+  background: none;
+  width: 100%;
   outline: none;
-  cursor: pointer;
-  margin-top: 16px;
+  padding: 5px;
+  border: none;
+  color: ${props => props.color};
+  font-family: Roboto;
+`
+export const LoaderContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
 `
