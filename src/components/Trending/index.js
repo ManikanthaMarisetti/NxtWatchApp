@@ -1,16 +1,13 @@
 import {Link} from 'react-router-dom'
 import {IoMdHome} from 'react-icons/io'
+import {FaGamepad} from 'react-icons/fa'
 import {HiFire} from 'react-icons/hi'
 import {MdPlaylistAdd} from 'react-icons/md'
-import {FaGamepad} from 'react-icons/fa'
 import {formatDistanceToNow} from 'date-fns'
-import {AiOutlineClose, AiOutlineSearch} from 'react-icons/ai'
 import {Component} from 'react'
 import Cookies from 'js-cookie'
 import Loader from 'react-loader-spinner'
-
 import ThemeContext from '../../context/ThemeContext'
-
 import Header from '../Header'
 import {
   MediaLogo,
@@ -20,29 +17,23 @@ import {
   UnorderedList,
   ListElement,
   ListItem,
-  BannerTitle,
-  BannerLogo,
-  BannerButton,
-  CloseButton,
   RightSideBottomContainer,
-  SearchBar,
-  SearchInput,
-  SearchButton,
   VideoUnorderedList,
   VideoThumbNail,
   VideoListItem,
-  DetailContainer,
-  Logo,
   TextContainer,
   Title,
+  Text,
   EmptyViewImage,
   HeadingFail,
   RetryButton,
   Reason,
   EmptyViewContainer,
+  TopContainer,
+  LogoElement,
+  Heading,
   LoaderContainer,
 } from './styledComponents'
-import './index.css'
 
 const apiUrlStatusConstant = {
   initial: 'INITIAL',
@@ -63,12 +54,14 @@ const sideBarContent = [
   },
 ]
 
-class Home extends Component {
+class Trending extends Component {
   state = {
-    searchInput: '',
     videoList: [],
     apiStatus: apiUrlStatusConstant.initial,
-    showBanner: true,
+  }
+
+  componentDidMount = () => {
+    this.getData()
   }
 
   renderSideContainer = isDark => (
@@ -83,7 +76,7 @@ class Home extends Component {
           {sideBarContent.map(eachContent => {
             const {icon} = eachContent
 
-            const isClick = eachContent.id === 0
+            const isClick = eachContent.id === 1
             let activeBgColor = 'transparent'
             let activeColor = ''
             let fontWeight = 'normal'
@@ -138,19 +131,10 @@ class Home extends Component {
     </SideContainer>
   )
 
-  componentDidMount = () => {
-    this.getData()
-  }
-
-  removeBanner = () => {
-    this.setState({showBanner: false})
-  }
-
   getData = async () => {
     this.setState({apiStatus: apiUrlStatusConstant.inProgress})
-    const {searchInput} = this.state
     const jwtToken = Cookies.get('jwt_token')
-    const apiUrl = `https://apis.ccbp.in/videos/all?search=${searchInput}`
+    const apiUrl = 'https://apis.ccbp.in/videos/trending'
     const option = {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
@@ -189,27 +173,7 @@ class Home extends Component {
     )
   }
 
-  renderEmptyView = isDark => {
-    const onClickRetry = () => {
-      this.setState({apiStatus: apiUrlStatusConstant.inProgress}, this.getData)
-    }
-    const color = isDark ? '#ffffff' : '#212121'
-    return (
-      <EmptyViewContainer>
-        <EmptyViewImage
-          src="https://assets.ccbp.in/frontend/react-js/nxt-watch-no-search-results-img.png"
-          alt="no videos"
-        />
-        <HeadingFail color={color}>No Search results found</HeadingFail>
-        <Reason>Try different key words or remove search filter</Reason>
-        <RetryButton onClick={onClickRetry} type="button">
-          Retry
-        </RetryButton>
-      </EmptyViewContainer>
-    )
-  }
-
-  renderFailureView = isDark => {
+  renderFailure = isDark => {
     const onClickRetry = () => {
       this.setState({apiStatus: apiUrlStatusConstant.inProgress}, this.getData)
     }
@@ -233,46 +197,34 @@ class Home extends Component {
   renderSuccess = isDark => {
     const {videoList} = this.state
 
-    const isEmpty = videoList.length === 0
-
     return (
       <VideoUnorderedList>
-        {isEmpty
-          ? this.renderEmptyView(isDark)
-          : videoList.map(eachVideo => {
-              const timeDifference = formatDistanceToNow(
-                new Date(eachVideo.publishedAt),
-              )
-              const {id} = eachVideo
-              const titleColor = isDark ? '#ffffff' : '#212121'
-              const textColor = isDark ? '#94a3b8' : '#64748b'
+        {videoList.map(eachVideo => {
+          const timeDifference = formatDistanceToNow(
+            new Date(eachVideo.publishedAt),
+          )
+          const {id} = eachVideo
+          const titleColor = isDark ? '#ffffff' : '#212121'
+          const textColor = isDark ? '#94a3b8' : '#64748b'
 
-              return (
-                <Link className="link-style" to={`/videos/${id}`}>
-                  <VideoListItem key={eachVideo.id}>
-                    <VideoThumbNail
-                      src={eachVideo.thumbnailUrl}
-                      alt="video thumbnail"
-                    />
-                    <DetailContainer>
-                      <Logo
-                        src={eachVideo.channel.profile_image_url}
-                        alt="channel logo"
-                      />
-                      <TextContainer>
-                        <Title color={titleColor}>{eachVideo.title}</Title>
-                        <Title color={textColor}>
-                          {eachVideo.channel.name}
-                        </Title>
-                        <Title color={textColor}>
-                          {eachVideo.viewCount} views {timeDifference} ago
-                        </Title>
-                      </TextContainer>
-                    </DetailContainer>
-                  </VideoListItem>
-                </Link>
-              )
-            })}
+          return (
+            <Link className="link-style" to={`/videos/${id}`}>
+              <VideoListItem key={eachVideo.id}>
+                <VideoThumbNail
+                  src={eachVideo.thumbnailUrl}
+                  alt="video thumbnail"
+                />
+                <TextContainer>
+                  <Title color={titleColor}>{eachVideo.title}</Title>
+                  <Text color={textColor}>{eachVideo.channel.name}</Text>
+                  <Text color={textColor}>
+                    {eachVideo.viewCount} views {timeDifference} ago
+                  </Text>
+                </TextContainer>
+              </VideoListItem>
+            </Link>
+          )
+        })}
       </VideoUnorderedList>
     )
   }
@@ -284,7 +236,7 @@ class Home extends Component {
       case apiUrlStatusConstant.success:
         return this.renderSuccess(isDark)
       case apiUrlStatusConstant.failure:
-        return this.renderFailureView(isDark)
+        return this.renderFailure(isDark)
       case apiUrlStatusConstant.inProgress:
         return this.renderLoader(isDark)
       default:
@@ -292,56 +244,26 @@ class Home extends Component {
     }
   }
 
-  renderBanner = isDark => {
-    const bannerImage =
-      'https://assets.ccbp.in/frontend/react-js/nxt-watch-banner-bg.png'
-    const bannerLogo = isDark
-      ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-dark-theme-img.png'
-      : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png'
-
+  renderTop = isDark => {
+    const backgroundColor = isDark ? '#231f20' : '#ebebeb'
+    const logoBgColor = isDark ? '#181818' : '#d7dfe9'
+    const colorHeading = isDark ? '#ffffff' : '#212121'
     return (
-      <HomeContainer
-        data-testid="banner"
-        justifyContent="space-between"
-        bgImage={bannerImage}
-      >
-        <div>
-          <BannerLogo src={bannerLogo} alt="nxt watch logo" />
-          <BannerTitle>
-            Buy Nxt Watch Premium prepaid plans with <br /> UPI
-          </BannerTitle>
-          <BannerButton type="button">GET IT NOW</BannerButton>
-        </div>
-        <CloseButton
-          data-testid="close"
-          onClick={this.removeBanner}
-          type="button"
-        >
-          <AiOutlineClose />
-        </CloseButton>
-      </HomeContainer>
+      <TopContainer bgColor={backgroundColor}>
+        <LogoElement bgColor={logoBgColor}>
+          <HiFire />
+        </LogoElement>
+        <Heading color={colorHeading}>Trending</Heading>
+      </TopContainer>
     )
   }
 
-  changeSearchInput = event => {
-    this.setState({searchInput: event.target.value})
-  }
-
-  onClickSearch = () => {
-    const {searchInput} = this.state
-    this.setState({searchInput}, this.getData)
-  }
-
   render() {
-    const {showBanner} = this.state
     return (
       <ThemeContext.Consumer>
         {value => {
           const {isDark} = value
-          const backgroundColor = isDark ? '#181818' : '#f8fafc'
-          const borderColor = isDark ? ' #606060' : '#d7dfe9'
-          const color = isDark ? '#f1f1f1' : '#212121'
-
+          const backgroundColor = isDark ? '#0f0f0f' : '#f8fafc'
           return (
             <>
               <Header />
@@ -352,28 +274,11 @@ class Home extends Component {
                   width={80}
                   height={80}
                 >
-                  {showBanner && this.renderBanner(isDark)}
+                  {this.renderTop(isDark)}
                   <RightSideBottomContainer
-                    data-testid="home"
+                    data-testid="trending"
                     bgColor={backgroundColor}
                   >
-                    <SearchBar>
-                      <SearchInput
-                        color={color}
-                        borderColor={borderColor}
-                        type="search"
-                        onChange={this.changeSearchInput}
-                        placeholder="Search"
-                      />
-                      <SearchButton
-                        borderColor={borderColor}
-                        type="button"
-                        data-testid="searchButton"
-                        onClick={this.onClickSearch}
-                      >
-                        <AiOutlineSearch />
-                      </SearchButton>
-                    </SearchBar>
                     {this.renderApiData(isDark)}
                   </RightSideBottomContainer>
                 </SideContainer>
@@ -386,4 +291,4 @@ class Home extends Component {
   }
 }
 
-export default Home
+export default Trending

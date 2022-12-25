@@ -1,46 +1,75 @@
-import styled from 'styled-components'
+import styled from 'styled-components/macro'
 
-export const NotFoundContainer = styled.div`
+export const HomeContainer = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: ${props => props.bgColor};
-  min-height: 92vh;
-  margin-top: 60px;
-  margin-bottom: 60px;
-  overflow-y: auto;
-
-  @media screen and (min-width: 768px) {
-    margin-left: 250px;
-    margin-bottom: 0px;
-  }
+  background-image: url(${props => props.bgImage});
+  background-size: 100% 100%;
+  justify-content: ${props => props.justifyContent};
+  align-items: ${props => props.alignItem};
 `
-
-export const NotFoundVideosView = styled.div`
+export const MediaLogo = styled.img`
+  height: 35px;
+  width: 35px;
+  margin-left: 20px;
+`
+export const SideBarPara = styled.p`
+  color: ${props => (props.isDark === true ? '#f4f4f4' : '#231f20')};
+  font-weight: bold;
+  margin-bottom: 30px;
+  font-size: 20px;
+  padding-left: 20px;
+`
+export const SideContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: ${props => props.justifyContent};
+  min-height: ${props => props.height}vw;
+  padding-top: 20px;
+  padding-right: 0;
+  width: ${props => props.width}vw;
+  padding-top: 0;
+  background-color: ${props => (props.isDark === true ? '#181818' : '#ffffff')};
+  position: sticky;
+`
+export const UnorderedList = styled.ul`
+  padding-left: 0;
+  margin-left: 0;
+`
+export const ListElement = styled.li`
+  display: flex;
+  list-style: none;
+  align-items: center;
+  padding-left: 20px;
+  background-color: ${props => props.bgColor};
+  color: ${props => props.color};
+`
+export const ListItem = styled.p`
+  margin-left: 20px;
+  font-weight: ${props => props.fontWeight};
+  color: ${props => (props.isDark === true ? '#ffffff' : '#383838')};
+`
+export const RightSideBottomContainer = styled.div`
+  width: 80vw;
+  min-height: 100vh;
+  background-color: ${props => props.bgColor};
+  padding-left: 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: none;
+`
+export const VideoUnorderedList = styled.ul`
+  display: flex;
+  flex-wrap: wrap;
+`
+export const NotFoundImage = styled.img`
+  height: 300px;
+  width: 300px;
+`
+export const Heading = styled.h1`
+  color: ${props => props.color};
 `
 
-export const NotFoundVideosImage = styled.img`
-  width: 200px;
-
-  @media screen and (min-width: 768px) {
-    width: 450px;
-  }
-`
-export const NotFoundVideosHeading = styled.h1`
-  font-family: Roboto;
-  font-size: 25px;
-  color: ${props => props.headingColor};
-  text-align: center;
-`
-
-export const NotFoundVideosNote = styled.p`
-  font-family: Roboto;
-  font-size: 18px;
-  color: ${props => props.noteColor};
-  text-align: center;
+export const Para = styled.p`
+  color: ${props => props.color};
 `
